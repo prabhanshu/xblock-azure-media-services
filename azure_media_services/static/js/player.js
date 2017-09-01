@@ -26,7 +26,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
     // Add event handlers
     var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
-
+    var azureEventPostUrl = runtime.handlerUrl(container, 'publish_event_azure');
     // This will be updated as the video plays.
     var timeHandler = null;
 
@@ -43,7 +43,7 @@ function AzureMediaServicesBlock(runtime, container) {
     this.addEventListener(amp.eventName.play,
       function(evt) {
         _sendPlayerEvent(eventPostUrl, 'edx.video.played', {});
-
+        _sendPlayerEvent(azureEventPostUrl, 'edx.video.played', {});
         timeHandler = setInterval(
           function() {
             _syncTimer(self, transcript_cues, $transcriptElement);
