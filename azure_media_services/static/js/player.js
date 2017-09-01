@@ -26,7 +26,8 @@ function AzureMediaServicesBlock(runtime, container) {
 
     // Add event handlers
     var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
-    var azureEventPostUrl = runtime.handlerUrl(container, 'publish_event_azure');
+    var azureEventPostUrl = '/azure'+eventPostUrl;
+
     // This will be updated as the video plays.
     var timeHandler = null;
 
@@ -63,7 +64,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
           // Enable button action.
           $transcriptButton.on('click keydown', (function(evt) {
-            var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
+            var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which)
             if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
               return;
             }
@@ -158,8 +159,10 @@ function initTranscript(player, transcript, $transcriptElement) {
     parser.parse(transcript);
   }
   catch (error) {
-    // TODO: remove when vtt bug is fixed.
-    $transcriptElement.append('<span><p>It appears there was a problem loading the transcript. Please see the support link located at the bottom of this page for additional help and information about browser compatibility. We apologize for the inconvenience.</p></span>');
+    // TODO: remove when firefox bug is fixed.
+    $transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
+    $transcriptElement.append('<span><p>error From File: ' + _.escape(error.fileName) + '</p></span><br/>');
+    $transcriptElement.append('<span><p>errorMessage: ' + _.escape(error.message) + '</p></span><br/>');
   }
   parser.flush();
 
