@@ -2,7 +2,17 @@
   Copyright (c) Microsoft Corporation. All Rights Reserved.
   Licensed under the MIT license. See LICENSE file on the project webpage for details.
   -->
-
+<script>
+    var browser_protection_type= _getPlayerType();
+    console.log(browser_protection_type);
+    console.log("${protection_type}");
+    if("${protection_type}" != "AES" && browser_protection_type != "${protection_type}" ){
+        new_protection = $("source").attr('data-setup').replace("${protection_type}",browser_protection_type);
+        console.log(new_protection);
+        console.log("match nahi mila");
+        $("source").attr('data-setup',new_protection)
+    }
+</script>
 <div class="xmodule_display xmodule_VideoModule">
 <div class="video closed">
 
