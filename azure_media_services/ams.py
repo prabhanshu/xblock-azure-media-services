@@ -121,8 +121,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
     # These are what become visible in the Mixin editor
     editable_fields = (
-        'display_name', 'video_url', 'video_url_drm', 'verification_key',
-        'verification_key_drm', 'protection_type',
+        'display_name', 'video_url', 'verification_key', 'video_url_drm', 'verification_key_drm', 'protection_type',
         'token_issuer', 'token_scope', 'captions', 'transcript_url', 'download_url',
     )
 
@@ -138,16 +137,16 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "download_url": self.download_url,
         }
 
-        if self.protection_type:
+        if self.protection_type and self.protection_type != "":
             if self.protection_type == 'AES':
                 context.update({
                     "video_url": self.video_url,
                     "auth_token": self.verification_key,
                 })
-            elif self.protection_type == 'DRM':
+            elif self.protection_type == 'DRM' or self.protection_type == 'PlayReady' or self.protection_type == 'Widevine':
                 context.update({
-                    "video_url": self.video_url_drm,
-                    "auth_token": self.verification_key_drm,
+                    "video_url": self.video_url,
+                    "auth_token": self.verification_key,
                 })
             elif self.protection_type == 'Both':
                 context.update({
