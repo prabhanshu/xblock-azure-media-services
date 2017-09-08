@@ -26,6 +26,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
     // Add event handlers
     var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
+    var azureEventPostUrl = '/azure'+eventPostUrl;
 
     // This will be updated as the video plays.
     var timeHandler = null;
@@ -43,7 +44,7 @@ function AzureMediaServicesBlock(runtime, container) {
     this.addEventListener(amp.eventName.play,
       function(evt) {
         _sendPlayerEvent(eventPostUrl, 'edx.video.played', {});
-
+        _sendPlayerEvent(azureEventPostUrl, 'edx.video.played', {});
         timeHandler = setInterval(
           function() {
             _syncTimer(self, transcript_cues, $transcriptElement);
@@ -63,7 +64,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
           // Enable button action.
           $transcriptButton.on('click keydown', (function(evt) {
-            var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
+            var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which)
             if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
               return;
             }
@@ -257,4 +258,35 @@ function _sendPlayerEvent(eventPostUrl, name, data) {
     url: eventPostUrl,
     data: JSON.stringify(data)
   });
+}
+
+function _getPlayerType(){
+    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+    var is_edge = navigator.userAgent.indexOf('Edge') > -1;
+    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
+    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+    var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
+    var playerType = "AES";
+    if ((is_chrome)&&(is_safari)) {is_safari=false;}
+    if ((is_chrome)&&(is_opera)) {is_chrome=false;}
+    if ((is_chrome)&&(is_edge)) {is_chrome=false;}
+
+    var webkit = /WebKit/.test(navigator.userAgent);
+    var opera = window.opera && window.opera.buildNumber;
+
+	var ie = !webkit && !opera && (/MSIE/gi).test(navigator.userAgent) && (/Explorer/gi).test(nav.appName);
+	ie = ie && /MSIE (\w+)\./.exec(userAgent)[1];
+	var ie11 = navigator.userAgent.indexOf('Trident/') != -1 && (navigator.userAgent.indexOf('rv:') != -1 || navigator.appName.indexOf('Netscape') != -1) ? 11 : false;
+
+	var is_explorer = ie || ie11;
+    if (is_chrome || is_firefox) {
+      playerType = "Widevine";
+    }
+    else if (is_edge || is_explorer) {
+      playerType = "PlayReady";
+    }
+    else {
+      playerType = "AES";
+    }
+    return playerType;
 }
