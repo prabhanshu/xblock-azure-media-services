@@ -45,14 +45,6 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings,
         default=_("Azure Media Services Video Player"),
     )
-    protection_type = String(
-        display_name=_("Protection Type"),
-        help=_(
-            "This can be either blank (meaning unprotected), 'AES', or 'DRM', or 'Both'"
-        ),
-        default="",
-        scope=Scope.settings
-    )
     # Ultimately this should come via some secure means, but this is OK for a PoC
     verification_key = String(
         display_name=_("Verification Key for AES"),
@@ -83,6 +75,14 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         display_name=_("Video Url for DRM"),
         help=_(
             "Enter the URL to your published video on Azure Media Services"
+        ),
+        default="",
+        scope=Scope.settings
+    )
+    protection_type = String(
+        display_name=_("Protection Type"),
+        help=_(
+            "This can be either blank (meaning unprotected), 'AES', or 'DRM', or 'Both'"
         ),
         default="",
         scope=Scope.settings
@@ -137,23 +137,42 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "download_url": self.download_url,
         }
 
+        # if self.protection_type:
+        #    context.update({
+        #     "auth_token": self.verification_key,
+        #    })
+        #
+        # return context
+
         if self.protection_type and self.protection_type != "":
             if self.protection_type == 'AES':
                 context.update({
                     "video_url": self.video_url,
                     "auth_token": self.verification_key,
+                    "auth_token_drm": self.verification_key,
+                    "video_url_drm": self.video_url
+
                 })
             elif self.protection_type == 'DRM' or self.protection_type == 'PlayReady' or self.protection_type == 'Widevine':
                 context.update({
-                    "video_url": self.video_url,
-                    "auth_token": self.verification_key,
+                    "video_url": self.video_url_drm,
+                    "auth_token": self.verification_key_drm,
+                    "auth_token_drm": self.verification_key_drm,
+                    "video_url_drm": self.video_url_drm
                 })
             elif self.protection_type == 'Both':
                 context.update({
                     "video_url": self.video_url,
-                    "video_url_drm": self.video_url_drm,
+                    "video_url_drm": self.video_url_drm if self.video_url_drm != '' else self.video_url,
                     "auth_token": self.verification_key,
-                    "auth_token_drm": self.verification_key_drm,
+                    "auth_token_drm": self.verification_key_drm if self.verification_key_drm != '' else self.verification_key,
+                })
+            elif self.protection_type:
+                context.update({
+                    "video_url": self.video_url,
+                    "auth_token": self.verification_key,
+                    "auth_token_drm": self.verification_key,
+                    "video_url_drm": self.video_url
                 })
 
         return context

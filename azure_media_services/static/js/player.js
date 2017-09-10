@@ -7,18 +7,6 @@ function AzureMediaServicesBlock(runtime, container) {
   //  a bug when switching units. Changing units triggers a "partial navigation" which
   //  entirely removes the xblock markup from the DOM.
   //
-  var browser_protection_type = _getPlayerType();
-  console.log(browser_protection_type);
-  console.log("${protection_type}");
-  if("${protection_type}" != "" && "${protection_type}" == "Both"){
-      if(browser_protection_type == 'DRM'){
-          new_protection = $("source").attr('data-setup').replace("${protection_type}",browser_protection_type);
-          new_token = new_protection.replace("${auth_token}","${auth_token_drm}");
-          new_video_url = $("source").attr('src').replace("${video_url}","${video_url_drm}");
-          $("source").attr('data-setup', new_token);
-          $("source").attr('src', new_video_url);
-      }
-  }
   var player = amp($(container).find('video')[0], null, function() {
     // Preserve
     var self = this;
@@ -270,41 +258,4 @@ function _sendPlayerEvent(eventPostUrl, name, data) {
     url: eventPostUrl,
     data: JSON.stringify(data)
   });
-}
-
-function _getPlayerType() {
-    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
-    var is_edge = navigator.userAgent.indexOf('Edge') > -1;
-    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
-    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
-    var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
-    var playerType = "AES";
-    if ((is_chrome) && (is_safari)) {
-        is_safari = false;
-    }
-    if ((is_chrome) && (is_opera)) {
-        is_chrome = false;
-    }
-    if ((is_chrome) && (is_edge)) {
-        is_chrome = false;
-    }
-
-    var webkit = /WebKit/.test(navigator.userAgent);
-    var opera = window.opera && window.opera.buildNumber;
-
-    var ie = !webkit && !opera && (/MSIE/gi).test(navigator.userAgent) && (/Explorer/gi).test(nav.appName);
-    ie = ie && /MSIE (\w+)\./.exec(userAgent)[1];
-    var ie11 = navigator.userAgent.indexOf('Trident/') != -1 && (navigator.userAgent.indexOf('rv:') != -1 || navigator.appName.indexOf('Netscape') != -1) ? 11 : false;
-
-    var is_explorer = ie || ie11;
-    if (is_chrome || is_firefox) {
-        playerType = "Widevine";
-    }
-    else if (is_edge || is_explorer) {
-        playerType = "PlayReady";
-    }
-    else if (is_safari) {
-        playerType = "AES";
-    }
-    return playerType;
 }

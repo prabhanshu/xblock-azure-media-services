@@ -2,6 +2,57 @@
   Copyright (c) Microsoft Corporation. All Rights Reserved.
   Licensed under the MIT license. See LICENSE file on the project webpage for details.
   -->
+<script>
+    var browser_protection_type = getPlayerType()
+    if ("${protection_type}" == "Both" && browser_protection_type != 'AES') {
+        if ("${protection_type}" != '' && "${auth_token}" != '' && "${video_url}" != '') {
+            new_protection = $("source").attr('data-setup').replace("${protection_type}", browser_protection_type);
+            new_token = new_protection.replace("${auth_token}", "${auth_token_drm}");
+            new_video_url = $("source").attr('src').replace("${video_url}", "${video_url_drm}");
+            $("source").attr('data-setup', new_token);
+            $("source").attr('src', new_video_url);
+        }
+    }else if(browser_protection_type == 'AES'){
+        new_protection = $("source").attr('data-setup').replace("${protection_type}",browser_protection_type);
+        $("source").attr('data-setup', new_protection);
+    }
+    function getPlayerType() {
+        var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+        var is_edge = navigator.userAgent.indexOf('Edge') > -1;
+        var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
+        var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+        var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
+        var playerType = "AES";
+        if ((is_chrome) && (is_safari)) {
+            is_safari = false;
+        }
+        if ((is_chrome) && (is_opera)) {
+            is_chrome = false;
+        }
+        if ((is_chrome) && (is_edge)) {
+            is_chrome = false;
+        }
+
+        var webkit = /WebKit/.test(navigator.userAgent);
+        var opera = window.opera && window.opera.buildNumber;
+
+        var ie = !webkit && !opera && (/MSIE/gi).test(navigator.userAgent) && (/Explorer/gi).test(nav.appName);
+        ie = ie && /MSIE (\w+)\./.exec(userAgent)[1];
+        var ie11 = navigator.userAgent.indexOf('Trident/') != -1 && (navigator.userAgent.indexOf('rv:') != -1 || navigator.appName.indexOf('Netscape') != -1) ? 11 : false;
+
+        var is_explorer = ie || ie11;
+        if (is_chrome || is_firefox) {
+            playerType = "Widevine";
+        }
+        else if (is_edge || is_explorer) {
+            playerType = "PlayReady";
+        }
+        else if (is_safari) {
+            playerType = "AES";
+        }
+        return playerType;
+    }
+</script>
 <div class="xmodule_display xmodule_VideoModule">
 <div class="video closed">
 
