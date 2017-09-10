@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 # According to edx-platform vertical xblocks
 CLASS_PRIORITY = ['video']
 
+
 @XBlock.needs('i18n')
 class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     """
@@ -44,8 +45,17 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings,
         default=_("Azure Media Services Video Player"),
     )
+    # Ultimately this should come via some secure means, but this is OK for a PoC
+    verification_key = String(
+        display_name=_("Verification Key for AES"),
+        help=_(
+            "Enter the Base64 encoded Verification Key from your Azure Management Portal"
+        ),
+        default="",
+        scope=Scope.settings
+    )
     video_url = String(
-        display_name=_("Video Url"),
+        display_name=_("Video Url for AES Protection"),
         help=_(
             "Enter the URL to your published video on Azure Media Services"
         ),
@@ -53,10 +63,18 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings
     )
     # Ultimately this should come via some secure means, but this is OK for a PoC
-    verification_key = String(
-        display_name=_("Verification Key"),
+    verification_key_drm = String(
+        display_name=_("Verification Key for DRM"),
         help=_(
             "Enter the Base64 encoded Verification Key from your Azure Management Portal"
+        ),
+        default="",
+        scope=Scope.settings
+    )
+    video_url_drm = String(
+        display_name=_("Video Url for DRM"),
+        help=_(
+            "Enter the URL to your published video on Azure Media Services"
         ),
         default="",
         scope=Scope.settings
@@ -64,7 +82,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     protection_type = String(
         display_name=_("Protection Type"),
         help=_(
-            "This can be either blank (meaning unprotected), 'AES', or 'PlayReady'"
+            "This can be either blank (meaning unprotected), 'AES', or 'DRM', or 'Both'"
         ),
         default="",
         scope=Scope.settings
@@ -77,7 +95,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default="http://openedx.microsoft.com/",
         scope=Scope.settings
     )
-    token_scope= String(
+    token_scope = String(
         display_name=_("Token Scope"),
         help=_(
             "This value must match what is in the 'Content Protection' area of the Azure Media Services portal"
@@ -103,7 +121,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
     # These are what become visible in the Mixin editor
     editable_fields = (
-        'display_name', 'video_url', 'verification_key', 'protection_type',
+        'display_name', 'video_url', 'verification_key', 'video_url_drm', 'verification_key_drm', 'protection_type',
         'token_issuer', 'token_scope', 'captions', 'transcript_url', 'download_url',
     )
 
@@ -114,16 +132,38 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         context = {
             "video_url": self.video_url,
             "protection_type": self.protection_type,
+            "video_url_drm": self.video_url,
             "captions": self.captions,
             "transcript_url": self.transcript_url,
-            "download_url": self.download_url,			
+            "download_url": self.download_url,
         }
 
         if self.protection_type:
-    	    context.update({
-	    	    "auth_token": self.verification_key,
-	        })
+            if self.protection_type == 'AES':
+                context.update({
+                    "auth_token": self.verification_key,
+                    "auth_token_drm": self.verification_key,
 
+                })
+            elif self.protection_type == 'DRM' or self.protection_type == 'PlayReady' or self.protection_type == 'Widevine' or self.protection_type == 'FairPlay':
+                context.update({
+                    "video_url": self.video_url_drm,
+                    "auth_token": self.verification_key_drm,
+                    "auth_token_drm": self.verification_key_drm,
+                    "video_url_drm": self.video_url_drm
+                })
+            elif self.protection_type == 'Both':
+                context.update({
+                    "video_url": self.video_url,
+                    "video_url_drm": self.video_url_drm if self.video_url_drm != '' else self.video_url,
+                    "auth_token": self.verification_key,
+                    "auth_token_drm": self.verification_key_drm if self.verification_key_drm != '' else self.verification_key,
+                })
+        else:
+            context.update({
+                "auth_token": self.verification_key,
+                "auth_token_drm": self.verification_key,
+            })
         return context
 
     def student_view(self, context):
@@ -164,7 +204,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         fragment.initialize_js('AzureMediaServicesBlock')
         return fragment
-    
+
     # xblock runtime navigation tab video image
     def get_icon_class(self):
         """
@@ -176,7 +216,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             if higher_class in child_classes:
                 new_class = higher_class
         return new_class
-    
+
     @XBlock.json_handler
     def publish_event(self, data, suffix=''):
         try:
@@ -188,4 +228,4 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         data['user_id'] = self.scope_ids.user_id
 
         self.runtime.publish(self, event_type, data)
-        return {'result':'success'}
+        return {'result': 'success'}
