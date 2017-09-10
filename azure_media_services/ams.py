@@ -132,28 +132,20 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         context = {
             "video_url": self.video_url,
             "protection_type": self.protection_type,
+            "video_url_drm": self.video_url,
             "captions": self.captions,
             "transcript_url": self.transcript_url,
             "download_url": self.download_url,
         }
 
-        # if self.protection_type:
-        #    context.update({
-        #     "auth_token": self.verification_key,
-        #    })
-        #
-        # return context
-
-        if self.protection_type and self.protection_type != "":
+        if self.protection_type:
             if self.protection_type == 'AES':
                 context.update({
-                    "video_url": self.video_url,
                     "auth_token": self.verification_key,
                     "auth_token_drm": self.verification_key,
-                    "video_url_drm": self.video_url
 
                 })
-            elif self.protection_type == 'DRM' or self.protection_type == 'PlayReady' or self.protection_type == 'Widevine':
+            elif self.protection_type == 'DRM' or self.protection_type == 'PlayReady' or self.protection_type == 'Widevine' or self.protection_type == 'FairPlay':
                 context.update({
                     "video_url": self.video_url_drm,
                     "auth_token": self.verification_key_drm,
@@ -167,14 +159,11 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                     "auth_token": self.verification_key,
                     "auth_token_drm": self.verification_key_drm if self.verification_key_drm != '' else self.verification_key,
                 })
-            elif self.protection_type:
-                context.update({
-                    "video_url": self.video_url,
-                    "auth_token": self.verification_key,
-                    "auth_token_drm": self.verification_key,
-                    "video_url_drm": self.video_url
-                })
-
+        else:
+            context.update({
+                "auth_token": self.verification_key,
+                "auth_token_drm": self.verification_key,
+            })
         return context
 
     def student_view(self, context):

@@ -4,15 +4,20 @@
   -->
 <script>
     var browser_protection_type = getPlayerType()
-    if ("${protection_type}" == "Both" && browser_protection_type != 'AES') {
-        if ("${protection_type}" != '' && "${auth_token}" != '' && "${video_url}" != '') {
-            new_protection = $("source").attr('data-setup').replace("${protection_type}", browser_protection_type);
-            new_token = new_protection.replace("${auth_token}", "${auth_token_drm}");
-            new_video_url = $("source").attr('src').replace("${video_url}", "${video_url_drm}");
-            $("source").attr('data-setup', new_token);
-            $("source").attr('src', new_video_url);
+    if ("${protection_type}" == "Both"){
+        if(browser_protection_type == 'AES'){
+            new_protection = $("source").attr('data-setup').replace("${protection_type}",browser_protection_type);
+            $("source").attr('data-setup', new_protection);
+        }else{
+                if ("${protection_type}" != '' && "${auth_token}" != '' && "${video_url}" != '') {
+                new_protection = $("source").attr('data-setup').replace("${protection_type}", browser_protection_type);
+                new_token = new_protection.replace("${auth_token}", "${auth_token_drm}");
+                new_video_url = $("source").attr('src').replace("${video_url}", "${video_url_drm}");
+                $("source").attr('data-setup', new_token);
+                $("source").attr('src', new_video_url);
+            }
         }
-    }else if(browser_protection_type == 'AES'){
+    }else if("${protection_type}" == "DRM" || "${protection_type}" == "Widevine" || "${protection_type}" == "PlayReady" || "${protection_type}" == "FairPlay"){
         new_protection = $("source").attr('data-setup').replace("${protection_type}",browser_protection_type);
         $("source").attr('data-setup', new_protection);
     }
