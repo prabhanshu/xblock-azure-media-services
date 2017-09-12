@@ -58,9 +58,9 @@ Clicking that xBlock will populate, the Unit with a functional - but unconfigure
 
 Click the Edit button in the upper right corner to expose the scrollable setting panel for the xBlock:
 
-![Settings1](docs/img/settings1.png)
-![Settings2](docs/img/settings2.png)
-![Settings3](docs/img/settings3.png)
+![Settings1](docs/img/settings4.png)
+![Settings2](docs/img/settings5.png)
+![Settings3](docs/img/settings6.png)
 
 The following is a description of the fields and how to configure them. At a minimum, the courseware author will need to fill in the Video Url to match what Azure Media Services portal says the Publish URL is, for example (old Azure dashboard):
 
@@ -115,9 +115,23 @@ The last line at the bottom is a valid Base64 encoded AES encryption key. Just c
 
 Then, regardless of how you generate these keys, simply copy one of the keys - typically the primary - into the clipboard and then paste it into the xBlock settings pane:
 
-![Filled in URL settings](docs/img/filled_in_url_settings.png)
+![Filled in URL settings](docs/img/filled_in_aes_url_settings1.png)
+![Filled in URL settings](docs/img/filled_in_aes_url_settings2.png)
 
 IMPORTANT: The courseware author also needs to specify the “Protection Type” in this case to match which Protection is being utilized - in this case AES.
+
+For DRM (PlayReady and Widevine) use "Protection Type" as DRM and specify the DRM token and video url
+
+![Filled in URL settings](docs/img/filled_in_drm_url_settings1.png)
+
+IMPORTANT: In this case Video url and Token related to AES can be left blank
+
+In Case you want to show both AES and DRM as a protection type in a single Xblock, you need to provide "Protection Type" as "Both"
+
+![Filled in URL settings](docs/img/filled_in_both_url_settings1.png)
+![Filled in URL settings](docs/img/filled_in_both_url_settings2.png)
+
+IMPORTANT: Both video url and token should be specified
 
 If all is configured correctly - i.e. the verification key, protection type, the token issuer, and token scope - then after saving these changes the video should properly play back.
 
